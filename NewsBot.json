@@ -1,0 +1,163 @@
+{
+  "name": "NewsBot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        -40
+      ],
+      "id": "86ff05fc-9f1d-49ef-8256-afda0bdafbe8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/top-headlines?category=technology&pageSize=5",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "9dbe2118b50f416e859f5e84a565db24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -180,
+        -40
+      ],
+      "id": "ef4e9908-33c4-45a3-bda2-638c7085f27e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize the top 10 news articles in 3 bullet points. Give spaces between headlines.\n\n\n{{ $json.title }}\n{{ $json.description }}\n{{ $json.content }}\n\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        -40
+      ],
+      "id": "1a006d12-19f0-47da-81e8-cdbaddc3e0f5",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "mindcraft-gpt4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        200,
+        120
+      ],
+      "id": "f1e53934-b4d9-4971-b579-b1cfbe6ef7df",
+      "name": "Azure OpenAI Chat Model",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "sWigkxDJckcvBDjj",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "gargeetripathi123@gmail.com",
+        "subject": "Today's Top 10 news headlines are:",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        -40
+      ],
+      "id": "8307f26f-fccc-4eda-92b3-6bc8a18a36c3",
+      "name": "Gmail1",
+      "webhookId": "65f5016b-cc74-4225-aace-61eabd2f0047",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yXUW37109Xm6ziDt",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e6c2ee94-17bf-4d04-a6ca-08ed6677150c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "abb700e748f71e8dd873531274fb49c5dbf1a91614610773601d81ed6408fbe6"
+  },
+  "id": "EmDIDT4onyD1xBUP",
+  "tags": []
+}
